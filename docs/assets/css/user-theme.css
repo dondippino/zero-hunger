@@ -1,0 +1,38 @@
+.theme-color {
+  color: #015C55!important
+}
+.bg-card-gradient-custom {
+  background-image: -o-linear-gradient(135deg, #015C55, #058d82);
+  background-image: linear-gradient(-45deg, #015C55, #058d82);
+  background-position: center;
+}
+.text-100{
+    font-weight: 100!important;
+}
+.text-200 {
+    font-weight: 200!important;
+}
+.text-300 {
+    font-weight: 300 !important;
+}
+.text-400 {
+    font-weight: 400 !important;
+}
+.bg-theme-color{
+    background: #015C55;
+}
+.pie-patch{
+    height: 280px!important;
+}
+.font-size-70-pct{
+    font-size: 0.7em;
+}
+.no-margin{
+    margin: 0 0;
+}
+.truncate {
+  width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
