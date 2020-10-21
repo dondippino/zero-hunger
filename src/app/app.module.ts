@@ -32,6 +32,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
     }),
     NgbModule
   ],
+  exports: [RouterModule],
   providers: [],
   bootstrap: [AppComponent]
 })
