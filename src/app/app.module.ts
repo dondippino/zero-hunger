@@ -1,5 +1,4 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -22,17 +21,13 @@ import { DashboardComponent } from './dashboard/dashboard.component';
   imports: [
     BrowserModule,
     HttpClientModule,
-    RouterModule.forRoot([
-      { path: 'home', component: HomeComponent },
-      { path: 'dashboard', component: DashboardComponent }
-    ]),
     AppRoutingModule,
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts')
     }),
     NgbModule
   ],
-  exports: [RouterModule],
+  exports: [],
   providers: [],
   bootstrap: [AppComponent]
 })
