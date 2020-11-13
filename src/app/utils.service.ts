@@ -1,17 +1,26 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http'; 
-import { Observable, of } from 'rxjs';
-
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Utility Service 
+ */
 export class UtilsService {
   constructor(private http: HttpClient) {
+    this.refreshAll = new Subject<any>();
+    this.updateAll = new Subject<any>();
+    this.refreshDataTable = new Subject<any>(); 
+
     this.httpClient = http;
    }
   public httpClient: HttpClient;
   public diskData:any;
+  public refreshAll:any;
+  public updateAll:any;
+  public refreshDataTable:any
   grays: any = (mode?) => {
     let colors = {
       white: "#fff",
