@@ -396,6 +396,7 @@ export class ChartDataService {
     this.echartsInstances.pie1.setOption(this.pieChartOptions, { notMerge: true });
     this.echartsInstances.tree1.setOption(this.treeMapOptions, { notMerge: true });
     this.utilService.refreshDataTable.next();
+    this.sendGroupDataByEvent();
   }
 
   clearFilter(dimension) {
