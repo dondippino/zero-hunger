@@ -6,7 +6,8 @@ export const environment = {
   production: false,
   nigeria: '../assets/nigeria.json',
   treeMap: '../assets/disk.tree.json',
-  zeroHunger: '../assets/combined.json'
+  zeroHunger: '../assets/combined.json',
+  apiServer: 'https://localhost:3000'
 };
 
 /*

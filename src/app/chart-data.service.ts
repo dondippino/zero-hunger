@@ -478,11 +478,11 @@ export class ChartDataService {
   }
 
   async initializeCrossfilter(){
-    let d = await this.http.get('http://localhost:3000/zero-hunger').toPromise();
-    this.mvamInadequateDiet = await this.http.get('http://localhost:3000/mvam/inadequate-diet').toPromise();
-    this.mvamlivelihoodBasedCoping = await this.http.get('http://localhost:3000/mvam/livelihood-based-coping').toPromise();
-    this.mvamInadequateDietTrend = await this.http.get('http://localhost:3000/mvam/inadequate-diet-trend').toPromise();
-    this.mvamlivelihoodBasedCopingTrend = await this.http.get('http://localhost:3000/mvam/livelihood-based-coping-trend').toPromise();
+    let d = await this.http.get(`${environment.apiServer}/zero-hunger`).toPromise();
+    this.mvamInadequateDiet = await this.http.get(`${environment.apiServer}/mvam/inadequate-diet`).toPromise();
+    this.mvamlivelihoodBasedCoping = await this.http.get(`${environment.apiServer}/mvam/livelihood-based-coping`).toPromise();
+    this.mvamInadequateDietTrend = await this.http.get(`${environment.apiServer}/mvam/inadequate-diet-trend`).toPromise();
+    this.mvamlivelihoodBasedCopingTrend = await this.http.get(`${environment.apiServer}/mvam/livelihood-based-coping-trend`).toPromise();
     
     this.zeroHungerData = crossfilter(<any>d);
     // this.mvamInadequateDiet = crossfilter(<any>mvamDiet);
@@ -660,8 +660,8 @@ export class ChartDataService {
   firstRun: boolean = true;
   async setLineChartData(){
     if (!this.firstRun) {
-      this.mvamInadequateDietTrend = await this.http.get(`http://localhost:3000/mvam/inadequate-diet-trend/${this.datatablePredicates.stateDim}`).toPromise();
-      this.mvamlivelihoodBasedCopingTrend = await this.http.get(`http://localhost:3000/mvam/livelihood-based-coping-trend/${this.datatablePredicates.stateDim}`).toPromise();
+      this.mvamInadequateDietTrend = await this.http.get(`${environment.apiServer}/mvam/inadequate-diet-trend/${this.datatablePredicates.stateDim}`).toPromise();
+      this.mvamlivelihoodBasedCopingTrend = await this.http.get(`${environment.apiServer}/mvam/livelihood-based-coping-trend/${this.datatablePredicates.stateDim}`).toPromise();
     }
     
     this.areaChartData1.x = Object.keys(this.mvamInadequateDietTrend);
