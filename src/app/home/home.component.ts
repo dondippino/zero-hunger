@@ -42,7 +42,10 @@ export class HomeComponent implements OnInit, AfterViewInit, AfterContentInit, O
   // Datatables data
   dtData:any = {};
 
-  dtOptions: DataTables.Settings = {};
+  dtOptions: DataTables.Settings = {
+    responsive: true,
+    "scrollX": true
+  };
   @ViewChild(DataTableDirective, { static: false })
   dtElement: DataTableDirective;
   dtTrigger = new Subject();
@@ -140,6 +143,7 @@ export class HomeComponent implements OnInit, AfterViewInit, AfterContentInit, O
         showDelay: 0,
         transitionDuration: 0.2,
         formatter: (params) => {
+          console.log('trace', params)
           let value: any = (params.value + '').split('.');
           value = value[0].replace(/(\d{1,3})(?=(?:\d{3})+(?!\d))/g, '$1,');
           return params.seriesName + '<br/>' + params.name + ': ' + value;

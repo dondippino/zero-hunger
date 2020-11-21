@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { UtilsService } from './utils.service'
 import * as crossfilter from 'crossfilter2/crossfilter';
+import { AsyncHook } from 'async_hooks';
 
 
 @Injectable({
@@ -12,6 +13,10 @@ export class ChartDataService {
 
   // Zero Hunger Cross-Filter Data
   zeroHungerData: any;
+  mvamInadequateDiet: any;
+  mvamlivelihoodBasedCoping: any;
+  mvamInadequateDietTrend: any;
+  mvamlivelihoodBasedCopingTrend: any;
 
   // Dimensions
   public dimensions: any = {
@@ -71,6 +76,8 @@ export class ChartDataService {
   // Map data
   mapData1: any;
   nigeriaGeoJSON:any;
+  mapData2:any;
+  mapData3:any;
 
   // Pie Chart
   pie1: any;
@@ -81,6 +88,10 @@ export class ChartDataService {
 
   // Table Data
   tableData:any;
+
+  // Area Chart Data
+  areaChartData1: any = {};
+  areaChartData2: any = {};
 
   // All filter states
   allFilterStates:any;
@@ -133,12 +144,13 @@ export class ChartDataService {
   }
 
   // Map options
-  mapOptions: any = {
+  mapOptionsBase: any = {
     tooltip: {
       trigger: 'item',
       showDelay: 0,
       transitionDuration: 0.2,
       formatter: (params) => {
+        console.log('trace',params)
         if (isNaN(params.value)) {
           return null;
         } else {
@@ -195,12 +207,16 @@ export class ChartDataService {
         textFixed: {
           Alaska: [20, -20]
         },
-        data: [] 
+        data: []
 
       }
     ],
     grid: { bottom: "0%", top: "0%", right: "40px", left: "40px" },
   }
+
+  mapOptions: any = JSON.parse(JSON.stringify(this.mapOptionsBase));
+  mapOptions2: any = JSON.parse(JSON.stringify(this.mapOptionsBase));
+  mapOptions3: any = JSON.parse(JSON.stringify(this.mapOptionsBase));
 
   // Pie Chart options
   pieChartOptions = {
@@ -335,6 +351,113 @@ export class ChartDataService {
     grid: { bottom: "8%", top: "0%", right: "40px", left: "40px" },
   }
 
+  // Area Chart Options
+  lineDefaultOptions = {
+    tooltip: {
+      triggerOn: "mousemove",
+      trigger: "axis",
+      padding: [7, 10],
+      formatter: "{b0}: {c0}",
+      backgroundColor: '#FFF',
+      borderColor: this.utilService.grays["300"],
+      borderWidth: 1,
+      transitionDuration: 0,
+      position: (pos, params, dom, rect, size) => {
+        return this.utilService.getPosition(pos, params, dom, rect, size);
+      },
+      textStyle: { color: '#0b1727' },
+    },
+    xAxis: {
+      type: "category",
+      data: [],
+      boundaryGap: false,
+      splitLine: { show: false },
+      axisLine: {
+        show: false,
+        lineStyle: {
+          color: '#ccc',
+          type: "solid",
+          width: 3
+        },
+      },
+      axisLabel: { show: true },
+      axisTick: { show: false },
+      axisPointer: {
+        type: "line",
+        lineStyle: {
+          color: '#ccc',
+          type: "dotted",
+          width: 1
+        },
+      },
+    },
+    yAxis: {
+      type: "value",
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: '#ccc',
+          type: "dashed",
+          width: 1
+        }
+      },
+      axisLine: {
+        show: false,
+        lineStyle: {
+          color: '#ccc',
+          type: "solid",
+          width: 3
+        }
+      },
+      axisLabel: { show: true },
+      axisTick: { show: false },
+      axisPointer: { show: false },
+    },
+    series: [
+      {
+        type: "line",
+        lineStyle: {
+          color: '#D3130C',
+          width: 3,
+        },
+        itemStyle: {
+          color: '#fff',
+          borderColor: '#D3130C',
+          borderWidth: 2,
+        },
+        hoverAnimation: true,
+        data: [],
+        connectNulls: true,
+        // smooth: 0.6,
+        smoothMonotone: "x",
+        symbol: "circle",
+        symbolSize: 0,
+        areaStyle: {
+          color: {
+            type: "linear",
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              {
+                offset: 0,
+                color: this.rgbaColor('#D3130C', 0.75),
+              },
+              {
+                offset: 1,
+                color: this.rgbaColor('#D3130C', 0),
+              },
+            ],
+          },
+        },
+      },
+    ],
+    grid: { bottom: "10%", top: "0%", right: "40px", left: "40px" },
+  };
+  lineOptions: any = JSON.parse(JSON.stringify(this.lineDefaultOptions));
+  lineOptions2: any = JSON.parse(JSON.stringify(this.lineDefaultOptions));
+
   constructor(private http: HttpClient, private utilService: UtilsService)  { }
   async initData() {
     await this.initializeCrossfilter();
@@ -347,8 +470,8 @@ export class ChartDataService {
     this.setMapData();
     this.setPieChartData();
     this.setTreeMapData();
-    
-
+    this.setLineChartData();
+    this.firstRun = false;
   }
 
   async fetchNigeriaGeoJSON(){
@@ -356,8 +479,15 @@ export class ChartDataService {
   }
 
   async initializeCrossfilter(){
-    let d = await this.http.get(environment.zeroHunger).toPromise();
+    let d = await this.http.get('http://localhost:3000/zero-hunger').toPromise();
+    this.mvamInadequateDiet = await this.http.get('http://localhost:3000/mvam/inadequate-diet').toPromise();
+    this.mvamlivelihoodBasedCoping = await this.http.get('http://localhost:3000/mvam/livelihood-based-coping').toPromise();
+    this.mvamInadequateDietTrend = await this.http.get('http://localhost:3000/mvam/inadequate-diet-trend').toPromise();
+    this.mvamlivelihoodBasedCopingTrend = await this.http.get('http://localhost:3000/mvam/livelihood-based-coping-trend').toPromise();
+    
     this.zeroHungerData = crossfilter(<any>d);
+    // this.mvamInadequateDiet = crossfilter(<any>mvamDiet);
+    // this.mvamlivelihoodBasedCoping = crossfilter(<any>mvamLBCoping);
   }
 
   createDimensions(){
@@ -388,13 +518,19 @@ export class ChartDataService {
     this.runFilter();
     this.setMapData(eval(this.namePredicates.stateDim));
     this.setPieChartData();
+    this.setLineChartData();
     this.setTreeMapData();
+    
   }
 
   refreshAllVisualization(){
     this.echartsInstances.map1.setOption(this.mapOptions, { notMerge: true });
+    this.echartsInstances.map2.setOption(this.mapOptions2, { notMerge: true });
+    this.echartsInstances.map3.setOption(this.mapOptions3, { notMerge: true });
     this.echartsInstances.pie1.setOption(this.pieChartOptions, { notMerge: true });
     this.echartsInstances.tree1.setOption(this.treeMapOptions, { notMerge: true });
+    this.echartsInstances.line1.setOption(this.lineOptions, { notMerge: true });
+    this.echartsInstances.line2.setOption(this.lineOptions2, { notMerge: true });
     this.utilService.refreshDataTable.next();
     this.sendGroupDataByEvent();
   }
@@ -459,6 +595,41 @@ export class ChartDataService {
     }
     this.mapOptions.series[0]['data'] = this.mapData1;
     this.mapOptions.visualMap.max = this.mapData1[0].value;
+
+    ////////////////////// initialize Map Data 2 /////////////////////////
+    // console.log(filterPredicate, this.mapData2,this.mvamInadequateDiet)
+    if (filterPredicate === undefined) {
+      this.mapData2 = this.mvamInadequateDiet.map(m => {
+        return { name: m['State'], value: m['Mean crrnt'] }
+      }).sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+    } else {
+      this.mapData2 = this.mvamInadequateDiet.map(m => {
+        return { name: m['State'], value: m['Mean crrnt'] }
+      }).filter(filterPredicate).sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+    }
+    
+    this.mapOptions2.series[0]['data'] = this.mapData2;
+
+    this.mapOptions2.visualMap.inRange.color = ['#73b358', '#97bb41', '#aec032', '#c6c623', '#e0cc13', '#ffd300', '#f7b002', '#f09104', '#e97406', '#df4809', '#d3130c'];
+    this.mapOptions2.visualMap.max = this.mapData2[0].value;
+
+    ////////////////////// initialize Map Data 3 /////////////////////////
+    // console.log(filterPredicate, this.mapData2,this.mvamInadequateDiet)
+    if (filterPredicate === undefined) {
+      this.mapData3 = this.mvamlivelihoodBasedCoping.map(m => {
+        return { name: m['State'], value: m['Mean crrnt'] }
+      }).sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+    } else {
+      this.mapData3 = this.mvamlivelihoodBasedCoping.map(m => {
+        return { name: m['State'], value: m['Mean crrnt'] }
+      }).filter(filterPredicate).sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+    }
+
+    this.mapOptions3.series[0]['data'] = this.mapData3;
+
+    this.mapOptions3.visualMap.inRange.color = ['#73b358', '#97bb41', '#aec032', '#c6c623', '#e0cc13', '#ffd300', '#f7b002', '#f09104', '#e97406', '#df4809', '#d3130c'];
+    this.mapOptions3.visualMap.max = this.mapData3[0].value;
+
   }
 
   setPieChartData() {
@@ -481,10 +652,33 @@ export class ChartDataService {
         o[c['STATE']]['children'].push({ name: c['LGA'].trim(), value: c['INDIVIDUALS'], path: c['STATE'].trim() + '/' + c['LGA'].trim() });
         o[c['STATE']]['value'] += parseInt(c['INDIVIDUALS']);
         return o;
-      }
+      }i
     }, {});
     this.treeMapData = Object.values(d);
     this.treeMapOptions.series[0]['data'] = this.treeMapData;
+  }
+
+  firstRun: boolean = true;
+  async setLineChartData(){
+    if (!this.firstRun) {
+      this.mvamInadequateDietTrend = await this.http.get(`http://localhost:3000/mvam/inadequate-diet-trend/${this.datatablePredicates.stateDim}`).toPromise();
+      this.mvamlivelihoodBasedCopingTrend = await this.http.get(`http://localhost:3000/mvam/livelihood-based-coping-trend/${this.datatablePredicates.stateDim}`).toPromise();
+    }
+    
+    this.areaChartData1.x = Object.keys(this.mvamInadequateDietTrend);
+    this.areaChartData1.y = Object.values(this.mvamInadequateDietTrend);
+    this.lineOptions.xAxis.data = this.areaChartData1.x;
+    this.lineOptions.series[0]['data'] = this.areaChartData1.y;
+
+    this.areaChartData2.x = Object.keys(this.mvamlivelihoodBasedCopingTrend);
+    this.areaChartData2.y = Object.values(this.mvamlivelihoodBasedCopingTrend);
+    this.lineOptions2.xAxis.data = this.areaChartData2.x;
+    this.lineOptions2.series[0]['data'] = this.areaChartData2.y;
+
+    if (!this.firstRun) {
+      this.echartsInstances.line1.setOption(this.lineOptions, { notMerge: true });
+      this.echartsInstances.line2.setOption(this.lineOptions2, { notMerge: true });
+    }
   }
 
   resetAllFilters(){
@@ -513,6 +707,35 @@ export class ChartDataService {
       under15: this.under15
     }
     this.utilService.refreshAll.next(data);
+  }
+
+
+  hexToRgb(hexValue) {
+    let hex;
+    hexValue.indexOf("#") === 0
+      ? (hex = hexValue.substring(1))
+      : (hex = hexValue);
+    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(
+      hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b)
+    );
+    return result
+      ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16),
+      ]
+      : null;
+  }
+
+
+  rgbColor(color = "#fff") {
+    return `rgb(${this.hexToRgb(color)})`;
+  }
+
+  rgbaColor(color = "#fff", alpha = 0.5) {
+    return `rgba(${this.hexToRgb(color)}, ${alpha})`;
   }
 
 }

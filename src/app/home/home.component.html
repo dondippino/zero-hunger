@@ -4,11 +4,11 @@
   <div class="container-fluid" data-layout="container-fluid">
 
     <div class="content">
-      <nav class="navbar navbar-light navbar-glass navbar-top sticky-kit navbar-expand bg-theme-color">
+      <nav class="navbar navbar-light navbar-glass navbar-top sticky-kit navbar-expand bg-theme-color ">
         <a class="navbar-brand mr-1 mr-sm-3" href="../index.html">
-          <div class="d-flex align-items-center"><span class="text-sans-serif text-primary text-white">NIGERIA:
-              VULNERABLE POPULATIONS
-              DASHBOARD</span>
+          <div class="d-flex align-items-center">
+            <span class="text-sans-serif text-primary text-white d-none  d-md-block">NIGERIA: VULNERABLE POPULATIONS DASHBOARD</span>
+            <span class="text-sans-serif text-primary text-white d-block  d-md-none navbar-brand-md-fix">NIGERIA: VULNERABLE POPULATIONS DASHBOARD</span>
           </div>
           <!-- <div class="not-navbar-brand">ZERO HUNGER ROUNDTABLE</div> -->
         </a>
@@ -193,7 +193,7 @@
       </div>
       <div class="row no-gutters">
 
-        <div class="col-md-2 col-xxl-3 mb-3 pr-md-2 pr-xxl-2">
+        <div class="col-lg-2 col-md-2 col-xxl-2 mb-3 pr-md-2 pr-xxl-2">
           <div class="card h-md-100">
             <div class="card-header d-flex flex-between-center pb-0">
               <h6 class="theme-color text-uppercase font-weight-semi-bold">National Social Register
@@ -232,7 +232,7 @@
           </div>
         </div>
 
-        <div class="col-md-5 col-xxl-3 mb-3 pl-md-2 pr-md-2 pr-xxl-2">
+        <div class="col-lg-5 col-md-5 col-xxl-5 mb-3 pl-md-2 pr-md-2 pr-xxl-2">
           <div class="card h-md-100">
             <div class="card-header d-flex flex-between-center pb-0">
               <h6 class="theme-color text-uppercase font-weight-semi-bold">State-Level Map<span class="ml-1 text-400"
@@ -247,7 +247,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-5 col-xxl-3 mb-3 pl-md-2 pr-xxl-2">
+        <div class="col-lg-5 col-md-5 col-xxl-5 mb-3 pl-md-2 pr-xxl-2">
           <div class="card h-md-100">
             <div class="card-header d-flex flex-between-center pb-0">
               <h6 class="theme-color text-uppercase font-weight-semi-bold">LGA-Level Map<span class="ml-1 text-400"
@@ -275,7 +275,7 @@
                 </div>
               </div>
             </div>
-            <div class="card-body px-0 pt-0">
+            <div class="card-body px-0 pt-0 pl-md-2 pr-md-2">
               <p>
               </p>
               <div class="dashboard-data-table pl-4 pr-4">
@@ -343,11 +343,13 @@
               </h6>
             </div>
             <div class="card-body rounded-soft ">
-              <div echarts [options]="mapOptions2" class="demo-chart"></div>
+              <!-- <div echarts [options]="mapOptions2" class="demo-chart"></div> -->
+              <div echarts (chartInit)="chartDataService.addEchartsInstance('map2', $event)"
+                [options]="chartDataService.mapOptions2" class="demo-chart"></div>
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-xxl-3 mb-3 pl-md-2">
+        <div class="col-md-6 col-xxl-3 mb-3 pl-md-2 pr-xxl-2">
           <div class="card h-md-100">
             <div class="card-header pb-0">
               <h6 class="mb-0 mt-2 d-flex align-items-center text-uppercase">% People with inadequate diet - Trend<span
@@ -357,15 +359,12 @@
               </h6>
             </div>
             <div class="card-body">
-              <div echarts [options]="lineDefaultOptions2" class="demo-chart"></div>
+              <div echarts (chartInit)="chartDataService.addEchartsInstance('line1', $event)"
+                [options]="chartDataService.lineOptions" class="demo-chart"></div>
             </div>
           </div>
         </div>
-
-      </div>
-      <div class="row no-gutters">
-
-        <div class="col-md-6 col-xxl-3 mb-3 pr-md-2 pr-xxl-2">
+        <div class="col-md-6 col-xxl-3 mb-3 pr-md-2 pl-xxl-2 pr-xxl-2">
           <div class="card h-md-100">
             <div class="card-header d-flex flex-between-center pb-0">
               <h6 class="theme-color text-uppercase font-weight-semi-bold">% Livelihood-Based Coping Startegies<span
@@ -376,7 +375,8 @@
               </h6>
             </div>
             <div class="card-body rounded-soft ">
-              <div echarts [options]="mapOptions2" class="demo-chart"></div>
+              <div echarts (chartInit)="chartDataService.addEchartsInstance('map3', $event)"
+                [options]="chartDataService.mapOptions3" class="demo-chart"></div>
             </div>
           </div>
         </div>
@@ -390,20 +390,26 @@
               </h6>
             </div>
             <div class="card-body">
-              <div echarts [options]="lineDefaultOptions2" class="demo-chart"></div>
+              <div echarts (chartInit)="chartDataService.addEchartsInstance('line2', $event)"
+                [options]="chartDataService.lineOptions2" class="demo-chart"></div>
             </div>
           </div>
         </div>
 
       </div>
+      <!-- <div class="row no-gutters">
+
+        
+
+      </div> -->
       <footer>
         <div class="row no-gutters justify-content-between fs--1 mt-4 mb-3">
           <div class="col-12 col-sm-auto text-center">
             <p class="mb-0 text-600">Zero Hunger Roundtable Dashboard <span class="d-none d-sm-inline-block">|
-              </span><br class="d-sm-none" /> 2020 &copy; <a href="https://wfp.org">WFP</a></p>
+              </span><br class="d-sm-none" /> 2020 &copy; <a target="_blank" href="https://wfp.org">WFP</a></p>
           </div>
           <div class="col-12 col-sm-auto text-center">
-            <p class="mb-0 text-600">v2.7.2</p>
+            <!-- <p class="mb-0 text-600">v2.7.2</p> -->
           </div>
         </div>
       </footer>

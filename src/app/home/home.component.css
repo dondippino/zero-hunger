@@ -40,3 +40,9 @@
   font-size: 12px;
   text-align: center;
 }
+.dashboard-data-table{
+  overflow-x: scroll;
+}
+.navbar-brand-md-fix{
+  font-size: 0.6rem;;
+}
