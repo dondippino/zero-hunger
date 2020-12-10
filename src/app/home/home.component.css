@@ -55,3 +55,12 @@
 .font-weight-100{
   font-weight: 100;
 }
+.absolute{
+  position: absolute;
+}
+.bottom-point-9em{
+  bottom: 1.1em;
+}
+.pop-count{
+  font-weight: 100;
+}

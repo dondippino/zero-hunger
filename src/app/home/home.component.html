@@ -63,10 +63,10 @@
                 data-countup='{"count":202800000,"format":"alphanumeric","prefix":""}'>0</div> -->
               <div aria-label="population" appCountup
                 class="display-4 fs-4 mb-2 text-sans-serif text-uppercase text-300 truncate"
-                options='{ "count": 202800000, "format": "alphanumeric", "prefix": "" }' val="202800000"
+                options='{ "count": 202800000, "format": "alphanumeric", "prefix": "" }' [val]="chartDataService.population"
                   data-options='{ "count": 202800000, "format": "alphanumeric", "prefix": "" }'>0</div>
-              <!-- <a class="font-weight-semi-bold text-white fs--1 text-nowrap" href="#!">Nigeria<span
-                  class="fas fa-angle-right ml-1" data-fa-transform="down-1"></span></a>-->
+                <span class="absolute bottom-point-9em font-size-70-pct pop-count">{{chartDataService.popInfo}}<span class="fas fa-angle-right ml-1"
+                    data-fa-transform="down-1"></span></span>
             </div>
           </div>
           <div class="card mb-3 overflow-hidden" style="min-width: 12rem">
@@ -245,7 +245,7 @@
             </div>
             <div class="card-body rounded-soft ">
               <div appDataRefresh echarts (chartInit)="chartDataService.addEchartsInstance('map1', $event)"
-                [options]="chartDataService.mapOptions" class="demo-chart"></div>
+                [options]="chartDataService.mapOptions" (chartClick)="chartDataService.mapClickHandler($event)" class="demo-chart"></div>
             </div>
           </div>
         </div>
@@ -347,6 +347,7 @@
             <div class="card-body rounded-soft ">
               <!-- <div echarts [options]="mapOptions2" class="demo-chart"></div> -->
               <div echarts (chartInit)="chartDataService.addEchartsInstance('map2', $event)"
+                (chartClick)="chartDataService.mapClickHandler($event)"
                 [options]="chartDataService.mapOptions2" class="demo-chart"></div>
             </div>
           </div>
@@ -380,6 +381,7 @@
             </div>
             <div class="card-body rounded-soft ">
               <div echarts (chartInit)="chartDataService.addEchartsInstance('map3', $event)"
+                (chartClick)="chartDataService.mapClickHandler($event)"
                 [options]="chartDataService.mapOptions3" class="demo-chart"></div>
             </div>
           </div>
@@ -516,6 +518,24 @@
              </div>
            </div>
          </div>
+         <!-- <hr /> -->
+         <!-- <h5 aria-controls="collapseDate" href="#collapseDate" data-toggle="collapse" class="fs-0 pointer">Date<i
+             class="fas fa-bars float-right"></i></h5>
+         <p class="fs--1">Select and filter by date. </p> -->
+         <!-- <div class="collapse show" id="collapseDate"> -->
+           <!-- <p>Min value: <input min="minValue" [(value)]="chartDataService.minValue"
+               (change)="chartDataService.setValsforDatePicker($event)"
+               type="date"></p>
+           <p>Max value: <input max="maxValue" [(value)]="chartDataService.maxValue"
+               (change)="chartDataService.setValsforDatePicker($event)"
+               type="date"></p> -->
+          <!-- <ngx-slider [(value)]="minValue" [(highValue)]="maxValue" [options]="options"></ngx-slider> -->
+          <!-- <button (click)="chartDataService.setValsforDatePicker()">Test Models</button> -->
+          <!-- <date-range-picker (rangeSelected)="pickerChange($event)" [options]="datePickerOption" [parentFormGroup]="form"
+            [controlName]="'myDateRange'"></date-range-picker>
+          <date-range-picker (rangeSelected)="pickerChange($event)" [options]="datePickerOption"
+            [parentFormGroup]="form" [controlName]="'myDateRange'"></date-range-picker> -->
+         <!-- </div> -->
          
        </div>
      </div>

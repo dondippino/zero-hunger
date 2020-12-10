@@ -12,6 +12,7 @@
   "private": true,
   "dependencies": {
     "@amcharts/amcharts4": "^4.10.5",
+    "@angular-slider/ngx-slider": "^2.0.3",
     "@angular/animations": "~9.1.0",
     "@angular/common": "~9.1.0",
     "@angular/compiler": "~9.1.0",
@@ -32,7 +33,9 @@
     "datatables.net": "^1.10.22",
     "datatables.net-dt": "^1.10.22",
     "echarts": "^4.9.0",
+    "moment": "^2.29.1",
     "ngx-countup": "^7.3.3",
+    "ngx-daterange": "^1.0.36",
     "ngx-echarts": "^5.1.2",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",

@@ -13,6 +13,7 @@ export class UtilsService {
     this.refreshAll = new Subject<any>();
     this.updateAll = new Subject<any>();
     this.refreshDataTable = new Subject<any>(); 
+    this.updatePopInfo = new Subject<any>(); 
 
     this.httpClient = http;
    }
@@ -21,6 +22,7 @@ export class UtilsService {
   public refreshAll:any;
   public updateAll:any;
   public refreshDataTable:any
+  public updatePopInfo: any
   grays: any = (mode?) => {
     let colors = {
       white: "#fff",

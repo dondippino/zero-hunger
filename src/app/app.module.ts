@@ -11,6 +11,11 @@ import { ChartsComponent } from './charts/charts.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CountUpModule } from 'ngx-countup';
 import { DataTablesModule } from 'angular-datatables';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { NgxDateRangeModule } from 'ngx-daterange';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+
 
 import { CountupDirective } from './countup.directive';
 import { DataService } from './data.service';
@@ -33,11 +38,15 @@ import { ChartDataService } from './chart-data.service';
     HttpClientModule,
     AppRoutingModule,
     DataTablesModule,
+    NgxSliderModule,
+    FormsModule,
+    NgxDateRangeModule,
+    ReactiveFormsModule,
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts')
     }),
     NgbModule,
-    CountUpModule
+    CountUpModule,
   ],
   exports: [],
   providers: [ChartDataService, { provide: APP_INITIALIZER, useFactory: initFunction, deps: [ChartDataService], multi: true }],

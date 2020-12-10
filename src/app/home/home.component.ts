@@ -2,6 +2,8 @@ import { AUTO_STYLE } from '@angular/animations';
 import { Component, ViewChild, ElementRef, OnInit, AfterViewInit, AfterContentInit, OnDestroy } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import * as echarts from 'echarts';
+import { Options } from '@angular-slider/ngx-slider';
+import { FormGroup, FormControl} from '@angular/forms'
 
 import { UtilsService } from '../utils.service';
 import { DataService } from '../data.service';
@@ -20,6 +22,7 @@ export class HomeComponent implements OnInit, AfterViewInit, AfterContentInit, O
   public utils: UtilsService;
   public dataSvc: ChartDataService;
 
+  popInfo: any = 'Nigeria';
   chartOption: any;
   lineDefaultOptions: any;
   lineDefaultOptions2: any;
@@ -55,7 +58,73 @@ export class HomeComponent implements OnInit, AfterViewInit, AfterContentInit, O
     this.utils = utilService;
     this.env = environment;
     this.dataSvc =  chartDataService;
+    this.utilService.updatePopInfo.subscribe((popInfo) => {
+      console.log(popInfo);
+      this.popInfo = popInfo;
+    })
   }
+  
+  form = new FormGroup({
+    from: new FormControl(),
+    to: new FormControl(),
+  });
+
+  pickerChange(event){
+    console.log(event);
+  }
+
+  // Slider 
+  // datePickerOption = {
+  //   singleCalendar: true
+  // }
+  
+  // options: Options = {
+  //   floor: 0,
+  //   ceil: 250
+  // };
+  
+
+  dateRange: Date[] = this.getDaysArray(new Date(this.chartDataService.areaChartData1.x[0]), new Date(this.chartDataService.areaChartData1.x[this.chartDataService.areaChartData1.x.length - 1]));
+  
+  options: Options = {
+    stepsArray: this.dateRange.map((date: Date) => {
+      return { value: date.getTime() };
+    }),
+    translate: (value: number, label): string => {
+      return new Date(value).toDateString();
+    }
+  };
+
+  // createDateRange(): Date[] {
+  //   const dates: Date[] = [];
+  //   for (let i: number = 1; i <= 31; i++) {
+  //     dates.push(new Date(2018, 5, i));
+  //   }
+  //   return dates;
+  // }
+
+//   Date.prototype.addDays =  (days) => {
+//     var date = new Date(this.valueOf());
+//     date.setDate(date.getDate() + days);
+//     return date;
+//   }
+
+//  getDates(startDate, stopDate) {
+//   var dateArray = new Array();
+//   var currentDate = startDate;
+//   while (currentDate <= stopDate) {
+//     dateArray.push(new Date(currentDate));
+//     currentDate = currentDate.addDays(1);
+//   }
+//   return dateArray;
+// }
+getDaysArray(start, end) {
+  for (var arr = [], dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
+    arr.push(new Date(dt));
+  }
+  console.log(new Date(this.chartDataService.areaChartData1.x[0]), new Date(this.chartDataService.areaChartData1.x[this.chartDataService.areaChartData1.x.length - 1]));
+  return arr;
+};
 
   mapOptions3 = {
     tooltip: {

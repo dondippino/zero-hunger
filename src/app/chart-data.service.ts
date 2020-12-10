@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { UtilsService } from './utils.service'
 import * as crossfilter from 'crossfilter2/crossfilter';
@@ -48,21 +48,30 @@ export class ChartDataService {
   echartsInstances: any = {};
   addEchartsInstance(key, instance) {
     this.echartsInstances[key] = instance;
-    this.echartsInstances[key].on('click', (params) => {
-      if (params.componentSubType === 'map' && params.data !== undefined){
-        this.stateModel[params.data.name] = true;
-        this.setAllDataToComponents();
-        this.refreshAllVisualization();
-        // Workaround for Groups
-        this.sendGroupDataByEvent();
-      }
-      if (params.componentSubType === 'map' && params.data === undefined) {
-        this.resetAllFilters();
-        // Workaround for Groups
-        this.sendGroupDataByEvent();
-      }
-    });
+    // this.echartsInstances[key].on('click', (params) => {
+    //   if (params.componentSubType === 'map' && params.data !== undefined){
+    //     this.stateModel[params.data.name] = true;
+    //     this.setAllDataToComponents();
+    //     this.refreshAllVisualization();
+    //     this.selectedStatesPopulation();
+    //     // Workaround for Groups
+    //     this.sendGroupDataByEvent();
+    //     // this.sendPopInfoEvent();
+    //   }
+    //   if (params.componentSubType === 'map' && params.data === undefined) {
+    //     this.resetAllFilters();
+    //     this.selectedStatesPopulation();
+    //     // Workaround for Groups
+    //     this.sendGroupDataByEvent();
+    //     // this.sendPopInfoEvent();
+    //   }
+      
+    // });
   }
+
+  // States Population
+  statesPopulation: any;
+  popInfo: any = 'Nigeria';
 
   // Groups
   disabled: any = 0;
@@ -71,6 +80,8 @@ export class ChartDataService {
   fhh: any;
   ill: any;
   under15: any;
+  population: any;
+  allPopulation: any;
 
   // Map data
   mapData1: any;
@@ -221,7 +232,10 @@ export class ChartDataService {
   pieChartOptions = {
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b} : {c} ({d}%)',
+      // formatter: '{a}? <br/>{b} : {c} ({d}%)',
+      formatter:  (params, ticket, callback)=> {
+        return `National Social Register <br/><b>${params.data.name}</b> : ${this.formatNumber(params.data.value)}`;
+      },
       position: 'right'
     },
     // roseType: 'radius',
@@ -285,10 +299,7 @@ export class ChartDataService {
           treePath.push(treePathInfo[i].name);
         }
 
-        return [
-          '<div class="tooltip-title">INDIVIDUALS</div>',
-          info.name + ': ' + value + ' ',
-        ].join('');
+        return `<div class="tooltip-title">INDIVIDUALS</div> <b>${info.name}</b>: ${this.formatNumber(value)}` ;
       }
     },
 
@@ -355,16 +366,17 @@ export class ChartDataService {
     tooltip: {
       triggerOn: "mousemove",
       trigger: "axis",
-      padding: [7, 10],
-      formatter: "{b0}: {c0}",
-      backgroundColor: '#FFF',
-      borderColor: this.utilService.grays["300"],
-      borderWidth: 1,
-      transitionDuration: 0,
+      // padding: [7, 10],
+      // formatter: "{b0}: {c0}",
+      // backgroundColor: '#FFF',
+      // borderColor: this.utilService.grays["300"],
+      // borderWidth: 1,
+      // transitionDuration: 0,
       position: (pos, params, dom, rect, size) => {
         return this.utilService.getPosition(pos, params, dom, rect, size);
       },
-      textStyle: { color: '#0b1727' },
+      // textStyle: { color: '#0b1727' },
+     
     },
     xAxis: {
       type: "category",
@@ -457,10 +469,11 @@ export class ChartDataService {
   lineOptions: any = JSON.parse(JSON.stringify(this.lineDefaultOptions));
   lineOptions2: any = JSON.parse(JSON.stringify(this.lineDefaultOptions));
 
-  constructor(private http: HttpClient, private utilService: UtilsService)  { }
+  constructor(private http: HttpClient, private utilService: UtilsService)  {}
   async initData() {
     await this.initializeCrossfilter();
     await this.fetchNigeriaGeoJSON();
+    await this.fetchNigeriaPopulation();
     this.createDimensions();
     this.constructDimensionPredicates();
     this.constructPredicates();
@@ -470,11 +483,21 @@ export class ChartDataService {
     this.setPieChartData();
     this.setTreeMapData();
     this.setLineChartData();
-    this.firstRun = false;
+    this.totalPopulation();
+    this.selectedStatesPopulation();
+
+    // this.minValue = this.areaChartData1.x[0];
+    // this.maxValue = this.areaChartData1.x[this.areaChartData1.x.length - 1];
+    this.firstRun = false; 
+    
   }
 
   async fetchNigeriaGeoJSON(){
     this.nigeriaGeoJSON = await this.http.get(environment.nigeria).toPromise();
+  }
+
+  async fetchNigeriaPopulation() {
+    this.statesPopulation = await this.http.get(environment.nigeria_population).toPromise();
   }
 
   async initializeCrossfilter(){
@@ -519,6 +542,8 @@ export class ChartDataService {
     this.setPieChartData();
     this.setLineChartData();
     this.setTreeMapData();
+    this.selectedStatesPopulation();
+    // console.log(this.selectedStatesPopulation(), this.datatablePredicates.stateDim)
     
   }
 
@@ -592,6 +617,16 @@ export class ChartDataService {
         return { name: m.key, value: m.value }
       }).filter(filterPredicate);
     }
+    this.mapOptions.tooltip.formatter = (params) => {
+      if (isNaN(params.value)) {
+        return null;
+      } else {
+
+        let value: any = (params.value + '').split('.');
+        value = value[0].replace(/(\d{1,3})(?=(?:\d{3})+(?!\d))/g, '$1,');
+        return `INDIVIDUALS <br/> <b>${params.name}</b>: ${value}`;
+      }
+    }
     this.mapOptions.series[0]['data'] = this.mapData1;
     this.mapOptions.visualMap.max = this.mapData1[0].value;
 
@@ -607,10 +642,19 @@ export class ChartDataService {
       }).filter(filterPredicate).sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
     }
     
+    this.mapOptions2.tooltip.formatter = (params) => {
+      if (isNaN(params.value)) {
+        return null;
+      } else {
+        return `% WITH INADEQUATE DIET <br/><b>${params.name}</b>: ${(params.value.toFixed(2))}`;
+      }
+    }
     this.mapOptions2.series[0]['data'] = this.mapData2;
 
     this.mapOptions2.visualMap.inRange.color = ['#73b358', '#97bb41', '#aec032', '#c6c623', '#e0cc13', '#ffd300', '#f7b002', '#f09104', '#e97406', '#df4809', '#d3130c'];
-    this.mapOptions2.visualMap.max = this.mapData2[0].value;
+    if (this.mapData2.length > 0){
+      this.mapOptions2.visualMap.max = this.mapData2[0].value;
+    }
 
     ////////////////////// initialize Map Data 3 /////////////////////////
     // console.log(filterPredicate, this.mapData2,this.mvamInadequateDiet)
@@ -624,10 +668,20 @@ export class ChartDataService {
       }).filter(filterPredicate).sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
     }
 
+    this.mapOptions3.tooltip.formatter = (params) => {
+      if (isNaN(params.value)) {
+        return null;
+      } else {
+        return `% WITH LIVELIHOOD BASED COPING STRATEGIES <br/> <b>${params.name}</b>: ${(params.value.toFixed(2))}`;
+      }
+    }
+
     this.mapOptions3.series[0]['data'] = this.mapData3;
 
     this.mapOptions3.visualMap.inRange.color = ['#73b358', '#97bb41', '#aec032', '#c6c623', '#e0cc13', '#ffd300', '#f7b002', '#f09104', '#e97406', '#df4809', '#d3130c'];
-    this.mapOptions3.visualMap.max = this.mapData3[0].value;
+    if (this.mapData3.length > 0) {
+      this.mapOptions3.visualMap.max = this.mapData3[0].value;
+    }
 
   }
 
@@ -674,10 +728,34 @@ export class ChartDataService {
     this.lineOptions2.xAxis.data = this.areaChartData2.x;
     this.lineOptions2.series[0]['data'] = this.areaChartData2.y;
 
+    this.lineOptions.tooltip.formatter = (info) => {
+      return `<b>${(info[0].value).toFixed(2)}</b><br/> ${info[0].name}`;
+    }
+
+    this.lineOptions2.tooltip.formatter = (info) => {
+      return `<b>${(info[0].value).toFixed(2)}</b><br/> ${info[0].name}`;
+    }
+
     if (!this.firstRun) {
       this.echartsInstances.line1.setOption(this.lineOptions, { notMerge: true });
       this.echartsInstances.line2.setOption(this.lineOptions2, { notMerge: true });
     }
+  }
+
+
+  // value: any = chartDataService.areaChartData1.x[0];
+  minValue: any = undefined;
+  maxValue: any = undefined;
+  setValsforDatePicker(event) {
+    if ( event.target.min === 'minValue' ) {
+      this.minValue = event.target.value
+    }
+    if ( event.target.max === 'maxValue' ) { 
+      this.maxValue = event.target.value
+    }
+    
+    this.setAllDataToComponents();
+    this.refreshAllVisualization();
   }
 
   resetAllFilters(){
@@ -703,7 +781,8 @@ export class ChartDataService {
       whh: this.whh,
       fhh: this.whh,
       ill: this.ill,
-      under15: this.under15
+      under15: this.under15,
+      population: this.population
     }
     this.utilService.refreshAll.next(data);
   }
@@ -736,5 +815,52 @@ export class ChartDataService {
   rgbaColor(color = "#fff", alpha = 0.5) {
     return `rgba(${this.hexToRgb(color)}, ${alpha})`;
   }
+  formatNumber(num) {
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+  }
 
+  selectedStatesPopulation(){
+    let stateArr = this.datatablePredicates.stateDim.trim().length === 0 ? []: this.datatablePredicates.stateDim.trim().split('|');
+    let result = stateArr.reduce((o, c, i) => {
+      o += this.statesPopulation[c];
+      return o;
+    }, 0);
+    this.population = result === 0 ? this.allPopulation : result;
+    
+    if(result === 0){
+      this.popInfo = 'Nigeria';
+    } else if (stateArr.length === 1){
+      this.popInfo = stateArr[0];
+    } else {
+      this.popInfo = `${stateArr.length} States`;
+    }
+  }
+  totalPopulation(){
+    this.allPopulation = Object.values(this.statesPopulation).reduce((o:number, c:number, i) => {
+      o += c;
+      return o;
+    }, 0);
+  }
+  // sendPopInfoEvent(){
+  //   console.log(this.popInfo)
+  //   this.utilService.updatePopInfo.next(this.popInfo);
+  // }
+  mapClickHandler(params){
+    if (params.componentSubType === 'map' && params.data !== undefined) {
+      this.stateModel[params.data.name] = true;
+      this.setAllDataToComponents();
+      this.refreshAllVisualization();
+      this.selectedStatesPopulation();
+      // Workaround for Groups
+      this.sendGroupDataByEvent();
+      // this.sendPopInfoEvent();
+    }
+    if (params.componentSubType === 'map' && params.data === undefined) {
+      this.resetAllFilters();
+      this.selectedStatesPopulation();
+      // Workaround for Groups
+      this.sendGroupDataByEvent();
+      // this.sendPopInfoEvent();
+    }
+  }
 }
